@@ -19,14 +19,13 @@ const addContact = async (body) => {
   const id = uuid()
   const newContact = {
     id,
-    ...body,
+    ...body
   }
   db.get('contacts').push(newContact).write()
   return newContact
 }
 
 const updateContact = async (contactId, body) => {
-  console.log(contactId)
   const record = db.get('contacts').find({ id: contactId }).assign(body).value()
   db.write()
   return record.id ? record : null
