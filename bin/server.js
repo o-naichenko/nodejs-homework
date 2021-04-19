@@ -1,4 +1,5 @@
 const app = require('../app')
+// const contactsApi = require('../model/index')
 
 const PORT = process.env.PORT || 3000
 
