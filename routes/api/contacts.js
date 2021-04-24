@@ -62,8 +62,7 @@ contactsRouter.post('/', validate.createContact, async (req, res, next) => {
 contactsRouter.delete('/:contactId', async (req, res, next) => {
   try {
     const contact = await contactsApi.removeContact(req.params.contactId)
-    console.log(contact)
-    if (contact.length !== 0) {
+    if (contact) {
       return res.json({
         status: 'success',
         code: 200,
