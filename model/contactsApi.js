@@ -8,26 +8,30 @@ const getListOfContacts = async () => {
 }
 
 const getContactById = async (contactId) => {
-  return db.get('contacts').find({ id: contactId }).value()
+  return await db.get('contacts').find({ id: contactId }).value()
 }
 
 const removeContact = async (contactId) => {
-  return db.get('contacts').remove({ id: contactId }).write()
+  return await db.get('contacts').remove({ id: contactId }).write()
 }
 
 const addContact = async (body) => {
   const id = uuid()
   const newContact = {
     id,
-    ...body
+    ...body,
   }
-  db.get('contacts').push(newContact).write()
+  await db.get('contacts').push(newContact).write()
   return newContact
 }
 
 const updateContact = async (contactId, body) => {
-  const record = db.get('contacts').find({ id: contactId }).assign(body).value()
-  db.write()
+  const record = await db
+    .get('contacts')
+    .find({ id: contactId })
+    .assign(body)
+    .value()
+  await db.write()
   return record.id ? record : null
 }
 
