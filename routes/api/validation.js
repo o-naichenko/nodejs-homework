@@ -26,11 +26,12 @@ const schemaUpdateContact = Joi.object({
 }).min(1)
 
 const schemaUpdateContactStatus = Joi.object({
-  favorite: Joi.bool()
+  favorite: Joi.bool(),
 })
 
 const validate = (schema, data, next) => {
   const { error } = schema.validate(data)
+
   if (error) {
     const [{ message }] = error.details
     next({

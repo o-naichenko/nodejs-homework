@@ -94,6 +94,13 @@ const update = async (req, res, next) => {
   }
 }
 const updateStatus = async (req, res, next) => {
+  if (Object.keys(req.body).length === 0) {
+    return res.json({
+      status: 'error',
+      code: 400,
+      message: 'No "favorite" field found',
+    })
+  }
   try {
     const contact = await contactsApi.updateContact(
       req.params.contactId,
