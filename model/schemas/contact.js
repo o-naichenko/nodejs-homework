@@ -5,7 +5,7 @@ const contactSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
+    unique: false,
   },
   email: {
     type: String,
@@ -17,7 +17,7 @@ const contactSchema = new Schema({
     required: true,
     unique: true,
   },
-  favourite: {
+  favorite: {
     type: Boolean,
     required: true,
   },

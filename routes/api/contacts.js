@@ -18,4 +18,9 @@ contactsRouter.patch(
   contactsController.update
 )
 
+contactsRouter.patch(
+  '/:contactId/favorite',
+  validate.updateContactStatus,
+  contactsController.updateStatus
+)
 module.exports = contactsRouter

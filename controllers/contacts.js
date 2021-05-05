@@ -93,11 +93,35 @@ const update = async (req, res, next) => {
     next(error)
   }
 }
-
+const updateStatus = async (req, res, next) => {
+  try {
+    const contact = await contactsApi.updateContact(
+      req.params.contactId,
+      req.body
+    )
+    if (contact) {
+      return res.json({
+        status: 'success',
+        code: 200,
+        message: 'Contact status updated',
+        data: { contact },
+      })
+    } else {
+      return res.status(404).json({
+        status: 'error',
+        code: 404,
+        message: `No contact with id: '${req.params.contactId}' found`,
+      })
+    }
+  } catch (error) {
+    next(error)
+  }
+}
 module.exports = {
   getAll,
   getById,
   create,
   remove,
   update,
+  updateStatus,
 }

@@ -22,8 +22,12 @@ const schemaUpdateContact = Joi.object({
     .string()
     .phoneNumber({ defaultCountry: 'UA', format: 'international' })
     .optional(),
-  favourite: Joi.bool(),
+  favourite: Joi.bool().default(false),
 }).min(1)
+
+const schemaUpdateContactStatus = Joi.object({
+  favorite: Joi.bool()
+})
 
 const validate = (schema, data, next) => {
   const { error } = schema.validate(data)
@@ -39,9 +43,13 @@ const validate = (schema, data, next) => {
   }
   next()
 }
+
 module.exports.createContact = (req, res, next) => {
   return validate(schemaCreateContact, req.body, next)
 }
 module.exports.updateContact = (req, res, next) => {
   return validate(schemaUpdateContact, req.body, next)
+}
+module.exports.updateContactStatus = (req, res, next) => {
+  return validate(schemaUpdateContactStatus, req.body, next)
 }
