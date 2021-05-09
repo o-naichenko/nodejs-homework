@@ -2,7 +2,7 @@ const express = require('express')
 const contactsRouter = express.Router()
 // const contactsApi = require('../../model/contactsApi')
 const validate = require('./validation')
-const contactsController = require('../../controllers/contacts')
+const contactsController = require('../../../controllers/contacts')
 
 contactsRouter.get('/', contactsController.getAll)
 
