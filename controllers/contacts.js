@@ -1,11 +1,13 @@
+require('dotenv').config()
+const { HttpCode } = require('../helpers/constants')
 const contactsApi = require('../model/contactsApi')
 
 const getAll = async (req, res, next) => {
   try {
     const contacts = await contactsApi.getListOfContacts()
-    return res.status(200).json({
+    return res.status(HttpCode.OK).json({
       status: 'success',
-      code: 200,
+      code: HttpCode.OK,
       message: 'Contacts list is in data',
       data: { contacts },
     })
@@ -16,19 +18,19 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   try {
-    const contact = await contactsApi.getContactById(req.params.contactId)
+    const contact = await contactsApi.getContactById(req.params.id)
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         message: 'Requested contact found',
         data: { contact },
       })
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
-        message: `No contact with id: '${req.params.contactId}' found`,
+        code: HttpCode.NOT_FOUND,
+        message: `No contact with id: '${req.params.id}' found`,
       })
     }
   } catch (error) {
@@ -39,9 +41,9 @@ const getById = async (req, res, next) => {
 const create = async (req, res, next) => {
   try {
     const contact = await contactsApi.addContact(req.body)
-    return res.status(201).json({
+    return res.status(HttpCode.CREATED).json({
       status: 'success',
-      code: 201,
+      code: HttpCode.CREATED,
       message: 'Contact added',
       data: { contact },
     })
@@ -52,17 +54,19 @@ const create = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   try {
-    const contact = await contactsApi.removeContact(req.params.contactId)
+    const contact = await contactsApi.removeContact(req.params.id)
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         message: 'Contact  deleted',
       })
     } else {
-      return res
-        .status(404)
-        .json({ status: 'error', code: 404, message: 'Not Found' })
+      return res.status(HttpCode.NOT_FOUND).json({
+        status: 'error',
+        code: HttpCode.NOT_FOUND,
+        message: 'Not Found',
+      })
     }
   } catch (error) {
     next(error)
@@ -71,22 +75,19 @@ const remove = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   try {
-    const contact = await contactsApi.updateContact(
-      req.params.contactId,
-      req.body
-    )
+    const contact = await contactsApi.updateContact(req.params.id, req.body)
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         message: 'Contact  updated',
         data: { contact },
       })
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
-        message: `No contact with id: '${req.params.contactId}' found`,
+        code: HttpCode.NOT_FOUND,
+        message: `No contact with id: '${req.params.id}' found`,
       })
     }
   } catch (error) {
@@ -97,27 +98,24 @@ const updateStatus = async (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
     return res.json({
       status: 'error',
-      code: 400,
+      code: HttpCode.BAD_REQUEST,
       message: 'No "favorite" field found',
     })
   }
   try {
-    const contact = await contactsApi.updateContact(
-      req.params.contactId,
-      req.body
-    )
+    const contact = await contactsApi.updateContact(req.params.id, req.body)
     if (contact) {
       return res.json({
         status: 'success',
-        code: 200,
+        code: HttpCode.OK,
         message: 'Contact status updated',
         data: { contact },
       })
     } else {
-      return res.status(404).json({
+      return res.status(HttpCode.NOT_FOUND).json({
         status: 'error',
-        code: 404,
-        message: `No contact with id: '${req.params.contactId}' found`,
+        code: HttpCode.NOT_FOUND,
+        message: `No contact with id: '${req.params.id}' found`,
       })
     }
   } catch (error) {
