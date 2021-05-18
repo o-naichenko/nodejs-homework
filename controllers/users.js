@@ -59,10 +59,33 @@ const login = async (req, res, next) => {
     next(error)
   }
 }
+const getCurrent = async (req, res, next) => {
+  try {
+    const user = await usersApi.findOne({ token: req.user.token })
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: 'error',
+        code: HttpCode.UNAUTHORIZED,
+        data: 'Conflict',
+        message: 'Not authorized',
+      })
+    }
+    return res.status(HttpCode.OK).json({
+      status: 'success',
+      code: HttpCode.OK,
+      data: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 const logout = async (req, res, next) => {
   const id = req.user.id
   await usersApi.updateToken(id, null)
   return res.status(HttpCode.NO_CONTENT).json({})
 }
 
-module.exports = { signup, login, logout }
+module.exports = { getCurrent, login, logout, signup }
