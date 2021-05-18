@@ -3,23 +3,31 @@ const contactsRouter = express.Router()
 // const contactsApi = require('../../model/contactsApi')
 const validate = require('./validation')
 const contactsController = require('../../../controllers/contacts')
+const guard = require('../../../helpers/guard')
 
-contactsRouter.get('/', contactsController.getAll)
+contactsRouter.get('/', guard, contactsController.getAll)
 
-contactsRouter.get('/:contactId', contactsController.getById)
+contactsRouter.get('/:id', guard, contactsController.getById)
 
-contactsRouter.post('/', validate.createContact, contactsController.create)
+contactsRouter.post(
+  '/',
+  guard,
+  validate.createContact,
+  contactsController.create
+)
 
-contactsRouter.delete('/:contactId', contactsController.remove)
+contactsRouter.delete('/:id', guard, contactsController.remove)
 
 contactsRouter.patch(
-  '/:contactId',
+  '/:id',
+  guard,
   validate.updateContact,
   contactsController.update
 )
 
 contactsRouter.patch(
-  '/:contactId/favorite',
+  '/:id/favorite',
+  guard,
   validate.updateContactStatus,
   contactsController.updateStatus
 )

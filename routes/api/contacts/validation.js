@@ -10,7 +10,8 @@ const schemaCreateContact = Joi.object({
     .string()
     .phoneNumber({ defaultCountry: 'UA', format: 'international' })
     .required(),
-  favourite: Joi.bool(),
+  owner: Joi.string().alphanum().min(3).max(30).required(),
+  favorite: Joi.bool(),
 })
 
 const schemaUpdateContact = Joi.object({

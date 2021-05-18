@@ -1,9 +1,10 @@
 const express = require('express')
 const usersRouter = express.Router()
 // const validate = require('./validation')
-const userController = require('../../../controllers/users')
+const usersController = require('../../../controllers/users')
+const guard = require('../../../helpers/guard')
 
-usersRouter.post('/signup', userController.signup)
-usersRouter.post('/login', userController.login)
-usersRouter.post('/logout', userController.logout)
+usersRouter.post('/signup', usersController.signup)
+usersRouter.post('/login', usersController.login)
+usersRouter.post('/logout', guard, usersController.logout)
 module.exports = usersRouter

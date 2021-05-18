@@ -4,8 +4,6 @@ const usersApi = require('../model/usersApi')
 const { HttpCode } = require('../helpers/constants')
 const SECRET_KEY = process.env.JWT_SECRET_KEY
 
-console.log(SECRET_KEY)
-
 const signup = async (req, res, next) => {
   try {
     const { email } = req.body
@@ -61,5 +59,10 @@ const login = async (req, res, next) => {
     next(error)
   }
 }
-const logout = async (req, res, next) => {}
+const logout = async (req, res, next) => {
+  const id = req.user.id
+  await usersApi.updateToken(id, null)
+  return res.status(HttpCode.NO_CONTENT).json({})
+}
+
 module.exports = { signup, login, logout }
