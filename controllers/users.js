@@ -87,5 +87,29 @@ const logout = async (req, res, next) => {
   await usersApi.updateToken(id, null)
   return res.status(HttpCode.NO_CONTENT).json({})
 }
+const update = async (req, res, next) => {
+  try {
+    const user = await usersApi.update(req.user.token, req.body)
+    if (!user) {
+      return res.status(HttpCode.UNAUTHORIZED).json({
+        status: 'error',
+        code: HttpCode.UNAUTHORIZED,
+        data: 'Conflict',
+        message: 'Not authorized',
+      })
+    }
+    return res.status(HttpCode.OK).json({
+      status: 'success',
+      code: HttpCode.OK,
+      message: 'User updated',
+      data: {
+        email: user.email,
+        subscription: user.subscription,
+      },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
-module.exports = { getCurrent, login, logout, signup }
+module.exports = { getCurrent, login, logout, signup, update }

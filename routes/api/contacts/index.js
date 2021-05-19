@@ -7,7 +7,12 @@ const guard = require('../../../helpers/guard')
 
 contactsRouter.get('/', guard, contactsController.getAll)
 
-contactsRouter.get('/:id', guard, contactsController.getById)
+contactsRouter.get(
+  '/:id',
+  guard,
+  validate.contactQuery,
+  contactsController.getById
+)
 
 contactsRouter.post(
   '/',
