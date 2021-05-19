@@ -40,7 +40,7 @@ const login = async (req, res, next) => {
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
         data: 'Conflict',
-        message: 'Invalid credentials',
+        message: 'Email or password is wrong',
       })
     }
     const id = user._id
