@@ -1,3 +1,4 @@
+// const { populate } = require('./schemas/contact')
 const Contact = require('./schemas/contact')
 // const fs = require('fs/promises')
 // const contacts = require('./contacts.json')
@@ -11,19 +12,48 @@ const Contact = require('./schemas/contact')
 //   return await client.db().collection(name)
 // }
 
-const getListOfContacts = async () => {
+const getListOfContacts = async (userId, query) => {
+  const {
+    sortBy,
+    sortByDesc,
+    filter,
+    favorite,
+    limit = '20',
+    page = '1',
+  } = query
   // const collection = await getCollection(db, 'contacts')
   // return await collection.find({}).toArray()
-  return await Contact.find({})
+  const options = { owner: userId }
+  if (favorite) {
+    options.favorite = { $all: [favorite] }
+  }
+
+  const result = await Contact.paginate(options, {
+    limit,
+    page,
+    sort: {
+      ...(sortBy ? { [`${sortBy}`]: 1 } : {}),
+      ...(sortByDesc ? { [`${sortByDesc}`]: 1 } : {}),
+    },
+    select: filter ? filter.split('|').join(' ') : '',
+    populate: {
+      path: 'owner',
+      select: 'email -_id',
+    },
+  })
+  const { docs: contacts, totalDocs: total } = result
+  return { total: total.toString(), limit, page, contacts }
 }
 
-const getContactById = async (contactId) => {
+const getContactById = async (id, userId) => {
   // const collection = await getCollection(db, 'contacts')
   // const objectId = new ObjectId(contactId)
   // console.log(objectId.getTimestamp())
   // const [result] = await collection.find({ _id: objectId }).toArray()
   // return result
-  return await Contact.findOne({ _id: contactId })
+  return await (
+    await Contact.findById(id, { owner: userId })
+  ).populate({ path: 'owner', select: 'email -_id' })
 }
 
 const addContact = async (body) => {
@@ -39,7 +69,7 @@ const addContact = async (body) => {
   return result
 }
 
-const updateContact = async (contactId, body) => {
+const updateContact = async (id, body, userId) => {
   // const collection = await getCollection(db, 'contacts')
   // const objectId = new ObjectId(contactId)
   // const { value: result } = await collection.findOneAndUpdate(
@@ -47,18 +77,22 @@ const updateContact = async (contactId, body) => {
   //   { $set: body },
   //   { returnOriginal: false }
   // )
-  const result = await Contact.findByIdAndUpdate(contactId, body, { new: true })
+  const result = await Contact.findByIdAndUpdate(
+    { _id: id, owner: userId },
+    { ...body },
+    { new: true }
+  )
   return result
 }
 
-const removeContact = async (contactId) => {
+const removeContact = async (id, userId) => {
   // const collection = await getCollection(db, 'contacts')
   // const objectId = new ObjectId(contactId)
   // const { value: result } = await collection.findOneAndDelete(
   //   { _id: objectId },
   //   { returnOriginal: false }
   // )
-  const result = await Contact.findByIdAndRemove({ _id: contactId })
+  const result = await Contact.findByIdAndRemove({ _id: id, owner: userId })
   return result
 }
 
