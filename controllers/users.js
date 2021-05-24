@@ -111,5 +111,5 @@ const update = async (req, res, next) => {
     next(error)
   }
 }
-
-module.exports = { getCurrent, login, logout, signup, update }
+const updateAvatar = async (req, res, next) => {}
+module.exports = { getCurrent, login, logout, signup, update, updateAvatar }
