@@ -1,8 +1,8 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
-const jimp = require('jimp')
+// const jimp = require('jimp')
 const fs = require('fs/promises')
-const path = require('path')
+// const path = require('path')
 const { promisify } = require('util')
 const cloudinary = require('cloudinary').v2
 const usersApi = require('../model/usersApi')
@@ -133,6 +133,7 @@ const updateAvatar = async (req, res, next) => {
   const { id } = req.user
   // const avatarUrl = await saveUserAvatar(req)
   const { avatarCloudId, avatarUrl } = await saveAvatarToCloudinary(req)
+  
   await usersApi.updateAvatar(id, avatarUrl, avatarCloudId)
   return res
     .status(HttpCode.OK)
@@ -163,6 +164,8 @@ const updateAvatar = async (req, res, next) => {
 // }
 const saveAvatarToCloudinary = async (req) => {
   const filePath = req.file.path
+  
+  // const { public_id: avatarCloudId, secure_url: avatarUrl } =
   const { public_id: avatarCloudId, secure_url: avatarUrl } =
     await uploadToCloud(filePath, {
       public_id: req.user.avatarCloudId?.replace('avatars/', ''),
@@ -170,6 +173,7 @@ const saveAvatarToCloudinary = async (req) => {
       transformation: { width: 250, height: 250, crop: 'pad' },
     })
   await fs.unlink(filePath)
+
   return { avatarCloudId, avatarUrl }
 }
 
