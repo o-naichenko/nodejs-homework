@@ -23,8 +23,8 @@ const update = async (token, body) => {
   )
   return result
 }
-const updateAvatar = async (id, avatar) => {
-  return await User.updateOne({ _id: id }, { avatar })
+const updateAvatar = async (id, avatar, avatarCloudId = null) => {
+  return await User.updateOne({ _id: id }, { avatar, avatarCloudId })
 }
 const updateToken = async (id, token) => {
   return await User.updateOne({ _id: id }, { token })
