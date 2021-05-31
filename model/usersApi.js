@@ -9,12 +9,9 @@ const findById = async (id) => {
 const findOne = async (query) => {
   return await User.findOne(query)
 }
-const create = async ({ email, password }) => {
-  const user = new User({ email, password })
+const create = async (data) => {
+  const user = new User(data)
   return await user.save()
-}
-const updateToken = async (id, token) => {
-  return await User.updateOne({ _id: id }, { token })
 }
 const update = async (token, body) => {
   const result = await User.findOneAndUpdate(
@@ -26,6 +23,12 @@ const update = async (token, body) => {
   )
   return result
 }
+const updateAvatar = async (id, avatar, avatarCloudId = null) => {
+  return await User.updateOne({ _id: id }, { avatar, avatarCloudId })
+}
+const updateToken = async (id, token) => {
+  return await User.updateOne({ _id: id }, { token })
+}
 
 module.exports = {
   create,
@@ -33,5 +36,6 @@ module.exports = {
   findById,
   findOne,
   update,
+  updateAvatar,
   updateToken,
 }
