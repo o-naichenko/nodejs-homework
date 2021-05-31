@@ -1,7 +1,7 @@
 const { Schema, model } = require('mongoose')
+
 const bcrypt = require('bcryptjs')
 const gravatar = require('gravatar')
-
 const { Subscription } = require('../../helpers/constants')
 const { nanoid } = require('nanoid')
 const SALT_WORK_FACTOR = 8

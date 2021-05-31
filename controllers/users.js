@@ -144,7 +144,6 @@ const updateAvatar = async (req, res, next) => {
   const { id } = req.user
   // const avatarUrl = await saveUserAvatar(req)
   const { avatarCloudId, avatarUrl } = await saveAvatarToCloudinary(req)
-
   await usersApi.updateAvatar(id, avatarUrl, avatarCloudId)
   return res
     .status(HttpCode.OK)
@@ -175,7 +174,6 @@ const updateAvatar = async (req, res, next) => {
 // }
 const saveAvatarToCloudinary = async (req) => {
   const filePath = req.file.path
-
   // const { public_id: avatarCloudId, secure_url: avatarUrl } =
   const { public_id: avatarCloudId, secure_url: avatarUrl } =
     await uploadToCloud(filePath, {
