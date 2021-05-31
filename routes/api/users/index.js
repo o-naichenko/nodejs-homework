@@ -34,4 +34,6 @@ usersRouter.patch(
   uploadAvatar.single('avatar'),
   usersController.updateAvatar
 )
+usersRouter.get('/verify/:token', usersController.verify)
+usersRouter.post('/verify', usersController.resendVerifyEmail)
 module.exports = usersRouter

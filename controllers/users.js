@@ -1,13 +1,14 @@
 require('dotenv').config()
 const jwt = require('jsonwebtoken')
-// const jimp = require('jimp')
+const jimp = require('jimp')
 const fs = require('fs/promises')
-// const path = require('path')
+const path = require('path')
 const { promisify } = require('util')
 const cloudinary = require('cloudinary').v2
+
 const usersApi = require('../model/usersApi')
 const { HttpCode } = require('../helpers/constants')
-const { unlink } = require('fs')
+const EmailService = require('../services/email')
 
 const SECRET_KEY = process.env.JWT_SECRET_KEY
 
@@ -19,26 +20,35 @@ cloudinary.config({
 
 const signup = async (req, res, next) => {
   try {
-    const { email } = req.body
-    const user = await usersApi.findByEmail(email)
+    const user = await usersApi.findByEmail(req.body.email)
     if (user) {
       return res.status(HttpCode.CONFLICT).json({
         status: 'error',
         code: HttpCode.CONFLICT,
         data: 'Conflict',
-        message: `Email ${email} is already used`,
+        message: `Email ${req.body.email} is already used`,
       })
     }
     const newUser = await usersApi.create(req.body)
+    const { avatar, email, id, name, subscription, verifyEmailToken } = newUser
+
+    try {
+      const emailService = new EmailService(process.env.NODE_ENV)
+      await emailService.sendVerifyEmail(email, name, verifyEmailToken)
+    } catch (error) {
+      console.log(error.body.messages)
+    }
 
     return res.status(HttpCode.CREATED).json({
       status: 'success',
       code: HttpCode.CREATED,
       message: 'User created',
       data: {
-        id: newUser.id,
-        email: newUser.email,
-        avatar: newUser.avatar,
+        avatar,
+        email,
+        id,
+        name,
+        subscription,
       },
     })
   } catch (error) {
@@ -49,15 +59,18 @@ const login = async (req, res, next) => {
   try {
     const { email, password } = req.body
     const user = await usersApi.findByEmail(email)
-    if (!user || !user.validPassword(password)) {
+    const isPasswordValid = await user?.validPassword(password)
+    if (!user || !isPasswordValid || !user?.verify) {
       return res.status(HttpCode.UNAUTHORIZED).json({
         status: 'error',
         code: HttpCode.UNAUTHORIZED,
         data: 'Conflict',
-        message: 'Email or password is wrong',
+        message: !user?.verify
+          ? 'User not Verified'
+          : 'Email or password is wrong',
       })
     }
-    const id = user._id
+    const id = user.id
     const payload = { id }
     const token = jwt.sign(payload, SECRET_KEY, { expiresIn: '2h' })
     await usersApi.updateToken(id, token)
@@ -65,9 +78,7 @@ const login = async (req, res, next) => {
     return res.status(HttpCode.OK).json({
       status: 'success',
       code: HttpCode.OK,
-      data: {
-        token,
-      },
+      data: { token },
     })
   } catch (error) {
     next(error)
@@ -133,7 +144,6 @@ const updateAvatar = async (req, res, next) => {
   const { id } = req.user
   // const avatarUrl = await saveUserAvatar(req)
   const { avatarCloudId, avatarUrl } = await saveAvatarToCloudinary(req)
-  
   await usersApi.updateAvatar(id, avatarUrl, avatarCloudId)
   return res
     .status(HttpCode.OK)
@@ -164,7 +174,6 @@ const updateAvatar = async (req, res, next) => {
 // }
 const saveAvatarToCloudinary = async (req) => {
   const filePath = req.file.path
-  
   // const { public_id: avatarCloudId, secure_url: avatarUrl } =
   const { public_id: avatarCloudId, secure_url: avatarUrl } =
     await uploadToCloud(filePath, {
@@ -177,4 +186,59 @@ const saveAvatarToCloudinary = async (req) => {
   return { avatarCloudId, avatarUrl }
 }
 
-module.exports = { getCurrent, login, logout, signup, update, updateAvatar }
+const verify = async (req, res, next) => {
+  try {
+    const user = await usersApi.findByVerifyEmailToken(req.params.token)
+    if (user) {
+      await usersApi.updateVerifyToken(user.id, true, null)
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: { message: 'Verification successful' },
+      })
+    }
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: 'error',
+      code: HttpCode.BAD_REQUEST,
+      data: 'Conflict',
+      message: `Invalid verification token, please, contact to administration`,
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+const resendVerifyEmail = async (req, res, next) => {
+  try {
+    console.log('req.body.email:', req.body.email)
+    const user = await usersApi.findByEmail(req.body.email)
+    console.log('user:', user)
+    if (user) {
+      const { email, name, verifyEmailToken } = user
+      const emailService = new EmailService(process.env.NODE_ENV)
+      await emailService.sendVerifyEmail(email, name, verifyEmailToken)
+      return res.status(HttpCode.OK).json({
+        status: 'success',
+        code: HttpCode.OK,
+        data: { message: 'Verification email resubmitted' },
+      })
+    }
+    return res.status(HttpCode.NOT_FOUND).json({
+      status: 'error',
+      code: HttpCode.NOT_FOUND,
+      data: { message: 'User not found' },
+    })
+  } catch (error) {
+    next(error)
+  }
+}
+
+module.exports = {
+  getCurrent,
+  login,
+  logout,
+  signup,
+  update,
+  updateAvatar,
+  verify,
+  resendVerifyEmail,
+}
